@@ -19,13 +19,35 @@ app.get("/todos", (c) => {
 // POST /todos — 새 할일 추가
 app.post("/todos", async (c) => {
   const body = await c.req.json();
-  const { title, dueDate } = body;
+  const { title, dueDate, sourceApp, linkedIssueId } = body;
 
   if (!title) {
     return c.json({ error: "title is required" }, 400);
   }
 
-  const todo = createTodo(title, dueDate);
+  const todo = createTodo(title, dueDate, sourceApp, linkedIssueId) as any;
+
+  // Linear에 이슈 자동 생성 (Calendar에서 직접 추가한 경우만)
+  if (sourceApp !== "linear") {
+    try {
+      await fetch("http://localhost:3002/issues", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          dueDate,
+          description: "",
+          status: "backlog",
+          priority: "none",
+          sourceApp: "calendar",
+          linkedTodoId: todo.id,
+        }),
+      });
+    } catch (e) {
+      console.error("Sync to Linear failed:", e);
+    }
+  }
+
   return c.json(todo, 201);
 });
 

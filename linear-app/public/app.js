@@ -112,6 +112,7 @@ function createIssueCard(issue) {
     <div class="issue-title">${escapeHtml(issue.title)}</div>
     <div class="issue-card-footer">
       <span class="priority-badge ${issue.priority}">${issue.priority === "none" ? "" : issue.priority}</span>
+      ${issue.dueDate ? `<span style="font-size:11px;color:#888;margin-left:auto;">${issue.dueDate}</span>` : ""}
     </div>
   `;
 
@@ -167,6 +168,7 @@ function openCreateModal() {
   $("#issueDesc").value = "";
   $("#issueStatus").value = "backlog";
   $("#issuePriority").value = "none";
+  $("#issueDueDate").value = "";
   $("#deleteBtn").style.display = "none";
   $("#modalOverlay").classList.add("active");
   $("#issueTitle").focus();
@@ -179,6 +181,7 @@ function openEditModal(issue) {
   $("#issueDesc").value = issue.description || "";
   $("#issueStatus").value = issue.status;
   $("#issuePriority").value = issue.priority;
+  $("#issueDueDate").value = issue.dueDate || "";
   $("#deleteBtn").style.display = "inline-block";
   $("#modalOverlay").classList.add("active");
   $("#issueTitle").focus();
@@ -198,6 +201,7 @@ async function saveIssue() {
     description: $("#issueDesc").value.trim(),
     status: $("#issueStatus").value,
     priority: $("#issuePriority").value,
+    dueDate: $("#issueDueDate").value || undefined,
   };
 
   if (editingIssue) {

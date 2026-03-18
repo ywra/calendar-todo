@@ -14,12 +14,20 @@ db.run(`
   )
 `);
 
+// 연동 컬럼 마이그레이션
+try { db.run("ALTER TABLE issues ADD COLUMN dueDate TEXT"); } catch {}
+try { db.run("ALTER TABLE issues ADD COLUMN sourceApp TEXT"); } catch {}
+try { db.run("ALTER TABLE issues ADD COLUMN linkedTodoId INTEGER"); } catch {}
+
 export interface Issue {
   id: number;
   title: string;
   description: string;
   status: string;
   priority: string;
+  dueDate?: string;
+  sourceApp?: string;
+  linkedTodoId?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,11 +58,11 @@ export function getIssue(id: number): Issue | null {
   return (db.prepare("SELECT * FROM issues WHERE id = ?").get(id) as Issue) || null;
 }
 
-export function createIssue(title: string, description: string, status: string, priority: string): Issue {
+export function createIssue(title: string, description: string, status: string, priority: string, dueDate?: string, sourceApp?: string, linkedTodoId?: number): Issue {
   const stmt = db.prepare(
-    "INSERT INTO issues (title, description, status, priority) VALUES (?, ?, ?, ?)"
+    "INSERT INTO issues (title, description, status, priority, dueDate, sourceApp, linkedTodoId) VALUES (?, ?, ?, ?, ?, ?, ?)"
   );
-  const result = stmt.run(title, description || "", status || "backlog", priority || "none");
+  const result = stmt.run(title, description || "", status || "backlog", priority || "none", dueDate ?? null, sourceApp ?? null, linkedTodoId ?? null);
   return getIssue(result.lastInsertRowid as number)!;
 }
 

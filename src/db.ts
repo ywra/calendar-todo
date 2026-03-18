@@ -12,15 +12,19 @@ db.run(`
   )
 `);
 
+// 연동 컬럼 마이그레이션
+try { db.run("ALTER TABLE todos ADD COLUMN sourceApp TEXT"); } catch {}
+try { db.run("ALTER TABLE todos ADD COLUMN linkedIssueId INTEGER"); } catch {}
+
 export function getAllTodos() {
   return db.query("SELECT * FROM todos ORDER BY createdAt DESC").all();
 }
 
-export function createTodo(title: string, dueDate?: string) {
+export function createTodo(title: string, dueDate?: string, sourceApp?: string, linkedIssueId?: number) {
   const stmt = db.prepare(
-    "INSERT INTO todos (title, dueDate) VALUES (?, ?)"
+    "INSERT INTO todos (title, dueDate, sourceApp, linkedIssueId) VALUES (?, ?, ?, ?)"
   );
-  const result = stmt.run(title, dueDate ?? null);
+  const result = stmt.run(title, dueDate ?? null, sourceApp ?? null, linkedIssueId ?? null);
   return db
     .query("SELECT * FROM todos WHERE id = ?")
     .get(result.lastInsertRowid);

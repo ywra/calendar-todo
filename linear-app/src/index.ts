@@ -22,9 +22,28 @@ app.get("/issues", (c) => {
 
 // POST /issues
 app.post("/issues", async (c) => {
-  const { title, description, status, priority } = await c.req.json();
+  const { title, description, status, priority, dueDate, sourceApp, linkedTodoId } = await c.req.json();
   if (!title) return c.json({ error: "title is required" }, 400);
-  const issue = createIssue(title, description, status, priority);
+  const issue = createIssue(title, description, status, priority, dueDate, sourceApp, linkedTodoId) as any;
+
+  // Calendar에 할일 자동 생성 (Linear에서 직접 추가 + dueDate가 있는 경우만)
+  if (sourceApp !== "calendar" && dueDate) {
+    try {
+      await fetch("http://localhost:3001/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          dueDate,
+          sourceApp: "linear",
+          linkedIssueId: issue.id,
+        }),
+      });
+    } catch (e) {
+      console.error("Sync to Calendar failed:", e);
+    }
+  }
+
   return c.json(issue, 201);
 });
 
