@@ -1,0 +1,12 @@
+{
+  "name": "calendar-todo-api",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "hono": "^4.7.0"
+  }
+}
