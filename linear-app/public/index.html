@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear Clone</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>Linear</h1>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="board">Board</button>
+        <button class="view-btn" data-view="list">List</button>
+      </div>
+      <button class="btn-primary" id="createBtn">+ New Issue</button>
+    </div>
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="board" id="board" style="display:flex;"></div>
+
+  <!-- List View -->
+  <div class="list-view" id="listView" style="display:none;"></div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">새 이슈</h2>
+        <button class="modal-close" id="cancelBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label>제목</label>
+        <input type="text" id="issueTitle" placeholder="이슈 제목" />
+
+        <label>설명</label>
+        <textarea id="issueDesc" placeholder="이슈 설명 (선택)"></textarea>
+
+        <label>상태</label>
+        <select id="issueStatus">
+          <option value="backlog">Backlog</option>
+          <option value="todo">Todo</option>
+          <option value="in_progress">In Progress</option>
+          <option value="done">Done</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <label>우선순위</label>
+        <select id="issuePriority">
+          <option value="none">None</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteBtn" style="display:none;">삭제</button>
+        <button class="btn-secondary" id="cancelBtn">취소</button>
+        <button class="btn-primary" id="saveBtn">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
