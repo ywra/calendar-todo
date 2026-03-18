@@ -147,3 +147,38 @@ linear-app/
 │   └── app.js          # 프론트엔드 로직
 └── package.json
 ```
+
+---
+
+## 3. Calendar ↔ Linear 양방향 연동
+
+두 앱은 서로 자동 동기화됩니다.
+
+### 동작 방식
+
+| 동작 | 결과 |
+|------|------|
+| Linear에서 마감일 있는 이슈 생성 | Calendar에 할일 자동 등록 |
+| Calendar에서 할일 추가 | Linear Backlog에 이슈 자동 생성 |
+
+### 루프 방지
+
+`sourceApp` 플래그를 사용하여 무한 루프를 방지합니다.
+
+```
+사용자 → Calendar에 할일 추가 (sourceApp: null)
+  → Calendar가 Linear에 이슈 생성 (sourceApp: "calendar")
+    → Linear는 sourceApp이 "calendar"이므로 Calendar에 다시 동기화하지 않음
+```
+
+### 실행 방법
+
+두 서버를 모두 실행해야 연동이 동작합니다.
+
+```bash
+# 터미널 1: Calendar (포트 3001)
+bun run start
+
+# 터미널 2: Linear (포트 3002)
+cd linear-app && bun install && bun run start
+```
