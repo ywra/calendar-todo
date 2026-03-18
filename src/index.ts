@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
-import { getAllTodos, createTodo, updateTodo, deleteTodo } from "./db";
+import { getAllTodos, createTodo, updateTodo, findTodoByLinkedIssueId, deleteTodo } from "./db";
 
 const app = new Hono();
 
@@ -51,16 +51,29 @@ app.post("/todos", async (c) => {
   return c.json(todo, 201);
 });
 
-// PUT /todos/:id — 완료 처리
-app.put("/todos/:id", (c) => {
+// PUT /todos/:id — 수정
+app.put("/todos/:id", async (c) => {
   const id = Number(c.req.param("id"));
-  const todo = updateTodo(id);
+  let fields: Record<string, any> | undefined;
+  try { fields = await c.req.json(); } catch {}
+  const todo = updateTodo(id, fields);
 
   if (!todo) {
     return c.json({ error: "todo not found" }, 404);
   }
 
   return c.json(todo);
+});
+
+// PUT /todos/sync/:issueId — Linear 연동용 (linkedIssueId로 검색 후 업데이트)
+app.put("/todos/sync/:issueId", async (c) => {
+  const issueId = Number(c.req.param("issueId"));
+  const todo = findTodoByLinkedIssueId(issueId) as any;
+  if (!todo) return c.json({ error: "linked todo not found" }, 404);
+
+  const fields = await c.req.json();
+  const updated = updateTodo(todo.id, fields);
+  return c.json(updated);
 });
 
 // DELETE /todos/:id — 삭제

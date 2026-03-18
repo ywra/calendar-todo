@@ -344,6 +344,13 @@
       await fetchTodos();
       renderCalendar();
       renderTodoList();
+
+      // 5초마다 자동 갱신 (Linear 연동 실시간 반영)
+      setInterval(async () => {
+        await fetchTodos();
+        renderCalendar();
+        renderTodoList();
+      }, 5000);
     }
 
     init();

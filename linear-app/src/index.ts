@@ -51,8 +51,45 @@ app.post("/issues", async (c) => {
 app.put("/issues/:id", async (c) => {
   const id = Number(c.req.param("id"));
   const fields = await c.req.json();
-  const issue = updateIssue(id, fields);
+  const issue = updateIssue(id, fields) as any;
   if (!issue) return c.json({ error: "issue not found" }, 404);
+
+  // Calendar 동기화 (linkedTodoId가 있으면 연결된 할일 업데이트)
+  if (issue.linkedTodoId) {
+    try {
+      const syncFields: Record<string, any> = {};
+      if (fields.title) syncFields.title = fields.title;
+      if (fields.dueDate !== undefined) syncFields.dueDate = fields.dueDate;
+      if (fields.status === "done") syncFields.completed = 1;
+      if (Object.keys(syncFields).length > 0) {
+        await fetch(`http://localhost:3001/todos/${issue.linkedTodoId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(syncFields),
+        });
+      }
+    } catch (e) {
+      console.error("Sync update to Calendar failed:", e);
+    }
+  } else if (issue.sourceApp !== "calendar") {
+    // linkedTodoId가 없지만 issueId로 연결된 할일 검색 후 업데이트
+    try {
+      const syncFields: Record<string, any> = {};
+      if (fields.title) syncFields.title = fields.title;
+      if (fields.dueDate !== undefined) syncFields.dueDate = fields.dueDate;
+      if (fields.status === "done") syncFields.completed = 1;
+      if (Object.keys(syncFields).length > 0) {
+        await fetch(`http://localhost:3001/todos/sync/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(syncFields),
+        });
+      }
+    } catch (e) {
+      console.error("Sync update to Calendar failed:", e);
+    }
+  }
+
   return c.json(issue);
 });
 
