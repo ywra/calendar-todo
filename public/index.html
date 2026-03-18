@@ -146,6 +146,7 @@
     let currentYear, currentMonth;
     let selectedDate = null;
     let dragTodoId = null;
+    let isEditing = false;
 
     const $ = (sel) => document.querySelector(sel);
 
@@ -352,6 +353,7 @@
         span.textContent = t.title;
         span.contentEditable = true;
         span.spellcheck = false;
+        span.addEventListener("focus", () => { isEditing = true; });
         span.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -359,6 +361,7 @@
           }
         });
         span.addEventListener("blur", async () => {
+          isEditing = false;
           const newTitle = span.textContent.trim();
           if (newTitle && newTitle !== t.title) {
             await updateTodoTitle(t.id, newTitle);
@@ -438,8 +441,9 @@
       renderCalendar();
       renderTodoList();
 
-      // 5초마다 자동 갱신 (Linear 연동 실시간 반영)
+      // 5초마다 자동 갱신 (편집 중이면 건너뜀)
       setInterval(async () => {
+        if (isEditing) return;
         await fetchTodos();
         renderCalendar();
         renderTodoList();
